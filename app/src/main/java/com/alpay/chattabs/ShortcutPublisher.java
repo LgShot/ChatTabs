@@ -23,12 +23,13 @@ public final class ShortcutPublisher {
             Conversation item = items.get(i);
             Intent intent = new Intent(context, OpenConversationActivity.class)
                     .setAction("OPEN_" + item.id)
+                    .putExtra(OpenConversationActivity.EXTRA_TITLE, item.title)
                     .putExtra(OpenConversationActivity.EXTRA_URL, item.url);
             String shortLabel = item.title.length() > 20 ? item.title.substring(0, 20) : item.title;
             shortcuts.add(new ShortcutInfo.Builder(context, "chat_" + item.id)
                     .setShortLabel(shortLabel)
                     .setLongLabel(item.title)
-                    .setIcon(Icon.createWithResource(context, com.alpay.chattabs.R.drawable.ic_launcher_round))
+                    .setIcon(Icon.createWithResource(context, R.drawable.ic_launcher_round))
                     .setIntent(intent)
                     .build());
         }

@@ -1,23 +1,18 @@
-# ChatTabs
+# ChatTabs 2.0
 
-Android'de sık kullanılan ChatGPT konuşmalarını sekme/kısayol gibi açmak için küçük, reklamsız ve çevrimdışı yardımcı uygulama.
+ChatTabs, resmî ChatGPT Android uygulamasındaki favori konuşmaları sekme gibi açmak için küçük bir native switcher'dır.
 
-## Özellikler
-- Yalnızca gerçek özel konuşma adreslerini kabul eder: `https://chatgpt.com/c/...`
-- `/share/` bağlantılarını reddeder; bunlar canlı konuşmanın devam bağlantısı değil, paylaşım görüntüsüdür.
-- Linki önce resmi ChatGPT Android uygulamasında açmayı dener, olmazsa tarayıcıya düşer.
-- Ana ekran widget'ında ilk 6 konuşmayı tek satırda gösterir.
-- ChatTabs ikonuna uzun basıldığında ilk 4 konuşmayı dinamik kısayol olarak sunar.
-- Ekle, düzenle, sil ve yukarı/aşağı sıralama vardır.
-- Tarayıcıdan metin/link paylaşımıyla yeni konuşma eklenebilir.
-- INTERNET izni istemez. Kayıtlar cihazdaki SharedPreferences içinde tutulur.
+- WebView yoktur.
+- Tarayıcı fallback yoktur.
+- `com.openai.chatgpt` dışında Accessibility işlemi yapmaz.
+- Konuşma başlığı tek başına yeterlidir; `/c/` linki isteğe bağlıdır.
+- Link varsa önce resmî ChatGPT uygulamasına native deep-link denenir.
+- Deep-link cihazda/uygulamada konuşmaya gitmezse ChatTabs Native Switch, ChatGPT arayüzünde kayıtlı başlığı bulup açmayı dener.
+- İlk 6 favori ana ekran widget'ında, ilk 4 favori uygulama ikonunun uzun-bas kısayollarında görünür.
+- ChatTabs mesaj içeriğini kaydetmez.
 
-## Kullanım
-1. ChatGPT'yi tarayıcıda aç.
-2. Devam etmek istediğin konuşmaya gir.
-3. Adres çubuğundaki `https://chatgpt.com/c/...` adresini kopyala.
-4. ChatTabs > Konuşma ekle > Panodan yapıştır.
-5. Ana ekrana uzun bas > Widget'lar > ChatTabs ile tek satır widget'ı ekle.
-
-## Derleme
-GitHub Actions iş akışı `Build Android APK` adıyla debug APK üretir ve `ChatTabs-debug-apk` artifact'ı olarak yükler.
+## İlk kurulum
+1. ChatTabs'i aç.
+2. Native Switch erişimini aç düğmesine bas.
+3. Android Erişilebilirlik ekranında ChatTabs Native Switch'i etkinleştir.
+4. ChatGPT'deki sohbet başlıklarını ChatTabs'e favori olarak ekle.

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">ChatTabs</string>
-    <string name="widget_description">Favori ChatGPT konuşmalarını tek satırda aç</string>
+    <string name="widget_description">Favori ChatGPT konuşmalarına hızlı geçiş</string>
+    <string name="accessibility_description">Yalnızca resmî ChatGPT Android uygulaması içinde seçtiğin sohbet başlığını bulup açmak için kullanılır. Mesaj içeriği saklanmaz ve tarayıcı açılmaz.</string>
 </resources>

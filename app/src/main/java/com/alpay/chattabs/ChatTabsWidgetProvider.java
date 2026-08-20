@@ -38,6 +38,7 @@ public class ChatTabsWidgetProvider extends AppWidgetProvider {
                 views.setTextViewText(viewId, compact(item.title));
                 Intent intent = new Intent(context, OpenConversationActivity.class)
                         .setAction("WIDGET_OPEN_" + widgetId + "_" + item.id)
+                        .putExtra(OpenConversationActivity.EXTRA_TITLE, item.title)
                         .putExtra(OpenConversationActivity.EXTRA_URL, item.url);
                 PendingIntent pending = PendingIntent.getActivity(
                         context,

@@ -10,8 +10,8 @@ public final class Conversation {
 
     public Conversation(long id, String title, String url) {
         this.id = id;
-        this.title = title;
-        this.url = url;
+        this.title = title == null ? "" : title;
+        this.url = url == null ? "" : url;
     }
 
     public JSONObject toJson() throws JSONException {
@@ -23,6 +23,10 @@ public final class Conversation {
     }
 
     public static Conversation fromJson(JSONObject obj) throws JSONException {
-        return new Conversation(obj.getLong("id"), obj.getString("title"), obj.getString("url"));
+        return new Conversation(
+                obj.getLong("id"),
+                obj.optString("title", "Chat"),
+                obj.optString("url", "")
+        );
     }
 }

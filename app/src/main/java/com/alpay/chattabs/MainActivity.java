@@ -9,9 +9,9 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.InputType;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,6 +24,7 @@ import java.util.List;
 
 public class MainActivity extends Activity {
     private LinearLayout listContainer;
+    private TextView nativeStatus;
     private int pad;
 
     @Override
@@ -57,12 +58,24 @@ public class MainActivity extends Activity {
         root.setPadding(pad, dp(18), pad, dp(28));
         scroll.addView(root, new ScrollView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        TextView title = text("ChatTabs", 30, true, R.color.text_primary);
-        root.addView(title);
-
-        TextView subtitle = text("Favori ChatGPT konuşmaların, telefonda sekme gibi tek dokunuş uzağında.", 15, false, R.color.text_secondary);
-        subtitle.setPadding(0, dp(4), 0, dp(16));
+        root.addView(text("ChatTabs", 30, true, R.color.text_primary));
+        TextView subtitle = text("Resmî ChatGPT Android uygulaması için native konuşma değiştirici.", 15, false, R.color.text_secondary);
+        subtitle.setPadding(0, dp(4), 0, dp(12));
         root.addView(subtitle);
+
+        nativeStatus = text("", 14, true, R.color.text_primary);
+        nativeStatus.setPadding(0, dp(4), 0, dp(6));
+        root.addView(nativeStatus);
+
+        Button access = new Button(this);
+        access.setText("Native Switch erişimini aç");
+        access.setAllCaps(false);
+        access.setOnClickListener(v -> startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)));
+        root.addView(access, matchWrap());
+
+        TextView accessInfo = text("Bu izin yalnızca com.openai.chatgpt içinde kayıtlı sohbet başlığını bulup dokunmak için kullanılır. Tarayıcı açılmaz ve ChatTabs mesaj içeriğini kaydetmez.", 13, false, R.color.text_secondary);
+        accessInfo.setPadding(0, dp(6), 0, dp(14));
+        root.addView(accessInfo);
 
         Button add = new Button(this);
         add.setText("+ Konuşma ekle");
@@ -71,7 +84,7 @@ public class MainActivity extends Activity {
         add.setOnClickListener(v -> showAddDialog(null));
         root.addView(add, matchWrap());
 
-        TextView hint = text("İpucu: ChatGPT'yi tarayıcıda aç → konuşmaya gir → adres çubuğundaki chatgpt.com/c/... linkini kopyala. Paylaşılan /share/ linklerini bilerek kabul etmiyoruz; onlar canlı sohbetin değil, paylaşım kopyasının bağlantısıdır.", 13, false, R.color.text_secondary);
+        TextView hint = text("Konuşmanın ChatGPT'deki başlığını yazman yeterli. /c/ linkini biliyorsan isteğe bağlı ekleyebilirsin; önce native deep-link denenir, gerekirse Native Switch başlıktan seçer.", 13, false, R.color.text_secondary);
         hint.setPadding(0, dp(12), 0, dp(14));
         root.addView(hint);
 
@@ -79,7 +92,7 @@ public class MainActivity extends Activity {
         listContainer.setOrientation(LinearLayout.VERTICAL);
         root.addView(listContainer, matchWrap());
 
-        TextView footer = text("Widget: Ana ekrana uzun bas → Widget'lar → ChatTabs. İlk 6 konuşma tek satırda görünür. Uygulama ikonuna uzun basarsan ilk 4 konuşma da hızlı kısayol olarak çıkar. Linkler yalnızca telefonda saklanır; ChatTabs'ın internet izni yoktur.", 13, false, R.color.text_secondary);
+        TextView footer = text("Widget'ta ilk 6, ChatTabs ikonuna uzun basınca ilk 4 konuşma görünür. Hepsi resmî ChatGPT Android uygulamasına gider; web fallback yoktur.", 13, false, R.color.text_secondary);
         footer.setPadding(0, dp(16), 0, 0);
         root.addView(footer);
 
@@ -87,6 +100,11 @@ public class MainActivity extends Activity {
     }
 
     private void refresh() {
+        if (nativeStatus != null) {
+            boolean enabled = OpenConversationActivity.isNativeSwitchEnabled(this);
+            nativeStatus.setText(enabled ? "Native Switch: AÇIK" : "Native Switch: KAPALI — bir kez etkinleştir");
+            nativeStatus.setTextColor(getColor(enabled ? R.color.text_primary : R.color.danger));
+        }
         if (listContainer == null) return;
         listContainer.removeAllViews();
         List<Conversation> items = ConversationStore.load(this);
@@ -94,7 +112,7 @@ public class MainActivity extends Activity {
         ChatTabsWidgetProvider.updateAll(this);
 
         if (items.isEmpty()) {
-            TextView empty = text("Henüz konuşma yok. İlk konuşmayı eklediğinde widget otomatik güncellenir.", 15, false, R.color.text_secondary);
+            TextView empty = text("Henüz konuşma yok. İlk favorinin ChatGPT'deki başlığını ekle.", 15, false, R.color.text_secondary);
             empty.setPadding(0, dp(18), 0, dp(18));
             listContainer.addView(empty);
             return;
@@ -112,12 +130,12 @@ public class MainActivity extends Activity {
         cardParams.setMargins(0, 0, 0, dp(10));
         listContainer.addView(card, cardParams);
 
-        TextView name = text(item.title, 17, true, R.color.text_primary);
-        card.addView(name);
+        card.addView(text(item.title, 17, true, R.color.text_primary));
 
-        TextView url = text(shortUrl(item.url), 12, false, R.color.text_secondary);
-        url.setPadding(0, dp(2), 0, dp(8));
-        card.addView(url);
+        String secondary = item.url.isEmpty() ? "Başlıktan native seçim" : shortUrl(item.url) + " · native link + seçim";
+        TextView detail = text(secondary, 12, false, R.color.text_secondary);
+        detail.setPadding(0, dp(2), 0, dp(8));
+        card.addView(detail);
 
         LinearLayout actions = new LinearLayout(this);
         actions.setOrientation(LinearLayout.HORIZONTAL);
@@ -125,7 +143,7 @@ public class MainActivity extends Activity {
         card.addView(actions, matchWrap());
 
         Button open = smallButton("Aç");
-        open.setOnClickListener(v -> openConversation(item.url));
+        open.setOnClickListener(v -> openConversation(item));
         actions.addView(open);
 
         Button up = smallButton("↑");
@@ -145,8 +163,8 @@ public class MainActivity extends Activity {
         Button delete = smallButton("Sil");
         delete.setTextColor(getColor(R.color.danger));
         delete.setOnClickListener(v -> new AlertDialog.Builder(this)
-                .setTitle("Konuşmayı kaldır")
-                .setMessage(item.title + " kısayolu silinsin mi? ChatGPT konuşmasının kendisi silinmez.")
+                .setTitle("Kısayolu kaldır")
+                .setMessage(item.title + " ChatTabs'tan kaldırılsın mı? ChatGPT konuşması silinmez.")
                 .setNegativeButton("Vazgeç", null)
                 .setPositiveButton("Sil", (d, w) -> { ConversationStore.delete(this, index); refresh(); })
                 .show());
@@ -164,9 +182,10 @@ public class MainActivity extends Activity {
                 .setPositiveButton("Kaydet", null)
                 .create();
         dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            String normalized = UrlTools.normalize(url.getText().toString());
-            if (!validateUrl(normalized)) return;
             String name = cleanTitle(title.getText().toString());
+            if (name.isEmpty()) { toast("ChatGPT'deki sohbet başlığını yaz."); return; }
+            String normalized = normalizeOptionalUrl(url.getText().toString());
+            if (normalized == null) return;
             List<Conversation> items = ConversationStore.load(this);
             if (index >= 0 && index < items.size()) {
                 items.set(index, new Conversation(item.id, name, normalized));
@@ -180,24 +199,26 @@ public class MainActivity extends Activity {
 
     private void showAddDialog(String initialUrl) {
         String clipboard = initialUrl != null ? initialUrl : clipboardUrl();
-        LinearLayout box = dialogFields("", UrlTools.isPrivateConversationUrl(clipboard) ? UrlTools.normalize(clipboard) : "");
+        String initial = UrlTools.isPrivateConversationUrl(clipboard) ? UrlTools.normalize(clipboard) : "";
+        LinearLayout box = dialogFields("", initial);
         EditText title = (EditText) box.getChildAt(0);
         EditText url = (EditText) box.getChildAt(1);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Konuşma ekle")
-                .setMessage("Başlık kısa olsun; widget'ta ilk 6 kayıt gösterilir.")
+                .setMessage("ChatGPT'de görünen sohbet başlığını aynen yaz. Link isteğe bağlıdır.")
                 .setView(box)
                 .setNegativeButton("Vazgeç", null)
-                .setNeutralButton("Panodan yapıştır", null)
+                .setNeutralButton("Linki panodan al", null)
                 .setPositiveButton("Ekle", null)
                 .create();
         dialog.setOnShowListener(ignored -> {
             dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> url.setText(clipboardUrl()));
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                String normalized = UrlTools.normalize(url.getText().toString());
-                if (!validateUrl(normalized)) return;
                 String name = cleanTitle(title.getText().toString());
+                if (name.isEmpty()) { toast("ChatGPT'deki sohbet başlığını yaz."); return; }
+                String normalized = normalizeOptionalUrl(url.getText().toString());
+                if (normalized == null) return;
                 ConversationStore.add(this, name, normalized);
                 dialog.dismiss();
                 refresh();
@@ -212,13 +233,13 @@ public class MainActivity extends Activity {
         box.setPadding(dp(24), dp(8), dp(24), 0);
 
         EditText title = new EditText(this);
-        title.setHint("Başlık: RSS, Sağlık, İngilizce…");
+        title.setHint("ChatGPT sohbet başlığı");
         title.setSingleLine(true);
         title.setText(titleValue);
         box.addView(title, matchWrap());
 
         EditText url = new EditText(this);
-        url.setHint("https://chatgpt.com/c/...");
+        url.setHint("İsteğe bağlı: https://chatgpt.com/c/...");
         url.setSingleLine(false);
         url.setMinLines(2);
         url.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
@@ -227,22 +248,24 @@ public class MainActivity extends Activity {
         return box;
     }
 
-    private boolean validateUrl(String url) {
-        if (UrlTools.isSharedUrl(url)) {
-            toast("Bu /share/ bağlantısı canlı sohbet değil. Tarayıcıdaki gerçek /c/ bağlantısını kopyala.");
-            return false;
+    private String normalizeOptionalUrl(String raw) {
+        String value = raw == null ? "" : raw.trim();
+        if (value.isEmpty()) return "";
+        String normalized = UrlTools.normalize(value);
+        if (UrlTools.isSharedUrl(normalized)) {
+            toast("/share/ linki canlı sohbet bağlantısı değildir. Bu alanı boş bırakabilirsin.");
+            return null;
         }
-        if (!UrlTools.isPrivateConversationUrl(url)) {
-            toast("Geçerli bir ChatGPT konuşma linki gerekli: https://chatgpt.com/c/...");
-            return false;
+        if (!UrlTools.isPrivateConversationUrl(normalized)) {
+            toast("Link kullanacaksan https://chatgpt.com/c/... biçiminde olmalı; yoksa alanı boş bırak.");
+            return null;
         }
-        return true;
+        return normalized;
     }
 
     private String cleanTitle(String raw) {
         String t = raw == null ? "" : raw.trim();
-        if (t.isEmpty()) return "Chat";
-        return t.length() > 40 ? t.substring(0, 40) : t;
+        return t.length() > 80 ? t.substring(0, 80) : t;
     }
 
     private void handleIncomingShare(Intent intent) {
@@ -250,11 +273,7 @@ public class MainActivity extends Activity {
         if (!"text/plain".equals(intent.getType())) return;
         String text = intent.getStringExtra(Intent.EXTRA_TEXT);
         String normalized = UrlTools.normalize(text);
-        if (UrlTools.isSharedUrl(normalized)) {
-            toast("ChatGPT paylaşım linki geldi; bu canlı sohbeti devam ettirmez. Gerçek /c/ linkini tarayıcıdan kopyala.");
-        } else if (UrlTools.isPrivateConversationUrl(normalized)) {
-            showAddDialog(normalized);
-        }
+        if (UrlTools.isPrivateConversationUrl(normalized)) showAddDialog(normalized);
     }
 
     private String clipboardUrl() {
@@ -266,9 +285,10 @@ public class MainActivity extends Activity {
         return text == null ? "" : text.toString();
     }
 
-    private void openConversation(String url) {
+    private void openConversation(Conversation item) {
         Intent intent = new Intent(this, OpenConversationActivity.class);
-        intent.putExtra(OpenConversationActivity.EXTRA_URL, url);
+        intent.putExtra(OpenConversationActivity.EXTRA_TITLE, item.title);
+        intent.putExtra(OpenConversationActivity.EXTRA_URL, item.url);
         startActivity(intent);
     }
 
