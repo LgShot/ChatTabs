@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#F6F6F7</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="text_primary">#151515</color>
+    <color name="text_secondary">#6C6C70</color>
+    <color name="accent">#111111</color>
+    <color name="danger">#B3261E</color>
+    <color name="chip_bg">#EBEBED</color>
+    <color name="widget_bg">#E8E8EA</color>
+    <color name="widget_chip">#FFFFFF</color>
+</resources>
