@@ -157,24 +157,25 @@ public class MainActivity extends Activity {
         LinearLayout box = dialogFields(item.title, item.url);
         EditText title = (EditText) box.getChildAt(0);
         EditText url = (EditText) box.getChildAt(1);
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Konuşmayı düzenle")
                 .setView(box)
                 .setNegativeButton("Vazgeç", null)
                 .setPositiveButton("Kaydet", null)
-                .setOnShowListener(dialog -> ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                    String normalized = UrlTools.normalize(url.getText().toString());
-                    if (!validateUrl(normalized)) return;
-                    String name = cleanTitle(title.getText().toString());
-                    List<Conversation> items = ConversationStore.load(this);
-                    if (index >= 0 && index < items.size()) {
-                        items.set(index, new Conversation(item.id, name, normalized));
-                        ConversationStore.save(this, items);
-                        ((AlertDialog) dialog).dismiss();
-                        refresh();
-                    }
-                }))
-                .show();
+                .create();
+        dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+            String normalized = UrlTools.normalize(url.getText().toString());
+            if (!validateUrl(normalized)) return;
+            String name = cleanTitle(title.getText().toString());
+            List<Conversation> items = ConversationStore.load(this);
+            if (index >= 0 && index < items.size()) {
+                items.set(index, new Conversation(item.id, name, normalized));
+                ConversationStore.save(this, items);
+                dialog.dismiss();
+                refresh();
+            }
+        }));
+        dialog.show();
     }
 
     private void showAddDialog(String initialUrl) {
@@ -183,26 +184,26 @@ public class MainActivity extends Activity {
         EditText title = (EditText) box.getChildAt(0);
         EditText url = (EditText) box.getChildAt(1);
 
-        new AlertDialog.Builder(this)
+        AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Konuşma ekle")
                 .setMessage("Başlık kısa olsun; widget'ta ilk 6 kayıt gösterilir.")
                 .setView(box)
                 .setNegativeButton("Vazgeç", null)
                 .setNeutralButton("Panodan yapıştır", null)
                 .setPositiveButton("Ekle", null)
-                .setOnShowListener(dialog -> {
-                    AlertDialog d = (AlertDialog) dialog;
-                    d.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> url.setText(clipboardUrl()));
-                    d.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-                        String normalized = UrlTools.normalize(url.getText().toString());
-                        if (!validateUrl(normalized)) return;
-                        String name = cleanTitle(title.getText().toString());
-                        ConversationStore.add(this, name, normalized);
-                        d.dismiss();
-                        refresh();
-                    });
-                })
-                .show();
+                .create();
+        dialog.setOnShowListener(ignored -> {
+            dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> url.setText(clipboardUrl()));
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
+                String normalized = UrlTools.normalize(url.getText().toString());
+                if (!validateUrl(normalized)) return;
+                String name = cleanTitle(title.getText().toString());
+                ConversationStore.add(this, name, normalized);
+                dialog.dismiss();
+                refresh();
+            });
+        });
+        dialog.show();
     }
 
     private LinearLayout dialogFields(String titleValue, String urlValue) {
