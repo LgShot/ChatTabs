@@ -20,11 +20,6 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.SEND" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="text/plain" />
-            </intent-filter>
         </activity>
 
         <activity
@@ -34,18 +29,13 @@
             android:noHistory="true"
             android:theme="@style/TransparentTheme" />
 
-        <service
-            android:name=".ChatSwitchAccessibilityService"
-            android:exported="true"
-            android:label="ChatTabs Native Switch"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/chat_switch_accessibility_service" />
-        </service>
+        <activity
+            android:name=".SlotTaskActivity"
+            android:documentLaunchMode="always"
+            android:excludeFromRecents="false"
+            android:exported="false"
+            android:launchMode="standard"
+            android:theme="@style/AppTheme" />
 
         <receiver
             android:name=".ChatTabsWidgetProvider"

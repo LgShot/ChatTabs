@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Icon;
+import android.net.Uri;
 import android.os.Build;
 
 import java.util.ArrayList;
@@ -22,11 +23,12 @@ public final class ShortcutPublisher {
         for (int i = 0; i < limit; i++) {
             Conversation item = items.get(i);
             Intent intent = new Intent(context, OpenConversationActivity.class)
-                    .setAction("OPEN_" + item.id)
-                    .putExtra(OpenConversationActivity.EXTRA_TITLE, item.title)
-                    .putExtra(OpenConversationActivity.EXTRA_URL, item.url);
+                    .setAction("OPEN_SLOT_" + item.id)
+                    .setData(Uri.parse(OpenConversationActivity.slotUri(item.id)))
+                    .putExtra(OpenConversationActivity.EXTRA_ID, item.id)
+                    .putExtra(OpenConversationActivity.EXTRA_TITLE, item.title);
             String shortLabel = item.title.length() > 20 ? item.title.substring(0, 20) : item.title;
-            shortcuts.add(new ShortcutInfo.Builder(context, "chat_" + item.id)
+            shortcuts.add(new ShortcutInfo.Builder(context, "slot_" + item.id)
                     .setShortLabel(shortLabel)
                     .setLongLabel(item.title)
                     .setIcon(Icon.createWithResource(context, R.drawable.ic_launcher_round))

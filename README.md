@@ -1,18 +1,26 @@
-# ChatTabs 2.0
+# ChatTabs 3.0 — Multi-task experiment
 
-ChatTabs, resmî ChatGPT Android uygulamasındaki favori konuşmaları sekme gibi açmak için küçük bir native switcher'dır.
+ChatTabs 3.0 tests a different architecture: **one saved slot = one Android document task**.
+It does not use a browser, WebView, Accessibility, or conversation-title automation.
 
-- WebView yoktur.
-- Tarayıcı fallback yoktur.
-- `com.openai.chatgpt` dışında Accessibility işlemi yapmaz.
-- Konuşma başlığı tek başına yeterlidir; `/c/` linki isteğe bağlıdır.
-- Link varsa önce resmî ChatGPT uygulamasına native deep-link denenir.
-- Deep-link cihazda/uygulamada konuşmaya gitmezse ChatTabs Native Switch, ChatGPT arayüzünde kayıtlı başlığı bulup açmayı dener.
-- İlk 6 favori ana ekran widget'ında, ilk 4 favori uygulama ikonunun uzun-bas kısayollarında görünür.
-- ChatTabs mesaj içeriğini kaydetmez.
+## Intended behavior
 
-## İlk kurulum
-1. ChatTabs'i aç.
-2. Native Switch erişimini aç düğmesine bas.
-3. Android Erişilebilirlik ekranında ChatTabs Native Switch'i etkinleştir.
-4. ChatGPT'deki sohbet başlıklarını ChatTabs'e favori olarak ekle.
+1. Create slots such as `HTB`, `SOC`, `B1`, `Kültür`.
+2. Open a slot for the first time. ChatTabs creates a unique task with base URI `chattabs://slot/<id>` and launches the official `com.openai.chatgpt` activity on top of it **without** `FLAG_ACTIVITY_NEW_TASK`.
+3. In that ChatGPT task, manually open the conversation you want and leave it there.
+4. Open another slot and choose another conversation.
+5. Reopening the original slot moves its existing task to the foreground rather than starting a new one.
+
+This depends on the official ChatGPT launch activity accepting normal Android task semantics. If ChatGPT declares or enforces `singleTask`/`singleInstance` behavior, Android can collapse the instances back to one task. In that case this experiment proves that a clone/container approach is required.
+
+## Extras
+
+- Per-slot pinned home-screen shortcuts (`requestPinShortcut`).
+- First four slots also become dynamic launcher shortcuts.
+- First six slots appear in the ChatTabs widget.
+- `Açık ChatTabs tasklarını sıfırla` removes only ChatTabs-created slot tasks from Recents.
+- No `INTERNET` permission.
+
+## Stable test signing
+
+Starting with v3, the repository carries a fixed non-production debug keystore so later ChatTabs test APKs can update v3 without changing Android signatures. Upgrading from older v1/v2 GitHub-runner debug builds may still require uninstalling the old ChatTabs once.
