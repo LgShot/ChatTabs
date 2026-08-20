@@ -67,7 +67,7 @@ public class OpenConversationActivity extends Activity {
                         ComponentName top = info.topActivity;
                         if (top == null || !CHATGPT_PACKAGE.equals(top.getPackageName())) {
                             Intent chatGpt = chatGptLaunchIntent();
-                            if (chatGpt != null) task.startActivity(this, chatGpt);
+                            if (chatGpt != null) task.startActivity(this, chatGpt, null);
                         }
                         return;
                     }
